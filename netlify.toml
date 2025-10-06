@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+[functions]
+  directory = "netlify/functions"
+[dev]
+  framework = "vite" # netlify dev가 Vite를 자동 인식
+[[redirects]]
+  from = "/admin"
+  to = "/"
+  status = 200
+  force = true
