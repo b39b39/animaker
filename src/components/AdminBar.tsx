@@ -1,5 +1,5 @@
 import netlifyIdentity from 'netlify-identity-widget';
-import { isAdmin } from '../lib/identity';
+//import { isAdmin } from '../lib/identity';
 
 export default function AdminBar({ editMode, onSave }:{
   editMode: boolean; onSave: ()=>void;

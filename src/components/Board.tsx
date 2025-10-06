@@ -8,7 +8,7 @@ import {
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
   SortableContext,
-  arrayMove,
+  //arrayMove,
   rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import TierColumn from './TierColumn';
@@ -16,7 +16,7 @@ import ItemModal from './ItemModal';
 import AdminBar from './AdminBar';
 import { fetchData, saveData } from '../lib/api';
 import { isAdmin } from '../lib/identity';
-import type { DataFile, Item, Tier } from '../lib/types';
+import type { DataFile, Item, /*Tier*/ } from '../lib/types';
 
 export default function Board() {
   const [data, setData] = useState<DataFile | null>(null);
