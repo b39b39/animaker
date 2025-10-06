@@ -1,0 +1,19 @@
+{
+  "tiers": [
+    { "id": "S", "label": "S", "color": "rgb(255,0,76)", "order": 0 },
+    { "id": "A", "label": "A", "color": "#00C2FF", "order": 1 },
+    { "id": "B", "label": "B", "color": "#9B59B6", "order": 2 }
+  ],
+  "items": [
+    {
+      "id": "fmab",
+      "title": "강철의 연금술사: 브라더후드",
+      "image": "/images/items/fmab.jpg",
+      "tierId": "S",
+      "summary": "완성도 높은 스토리와 캐릭터 구성이 돋보이는 명작.",
+      "pros": ["탄탄한 세계관", "완결성 높은 전개", "음악/연출 좋음"],
+      "cons": ["초반 페이스가 다소 빠름"]
+    }
+  ],
+  "lastUpdated": "2025-10-07T00:00:00Z"
+}
