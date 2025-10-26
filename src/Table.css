@@ -1,0 +1,13 @@
+/* 황 라벨 금속 질감 */
+.metal-text {
+    background: linear-gradient(
+            135deg,
+            #FFD700 0%,
+            #FFEC8B 25%,
+            #FFD700 50%,
+            #FFEC8B 75%,
+            #FFD700 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}

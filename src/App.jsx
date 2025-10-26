@@ -1,6 +1,7 @@
 import React from "react";
 import Layout from "./Layout";
 import { Table } from "./Table";
+import Header from "./Header";
 
 export default function App() {
   const rows = [
@@ -12,23 +13,10 @@ export default function App() {
 
   return (
     <Layout>
-      <div className="max-w-5xl w-full p-4 start-center">
-        <h1 className="text-3xl font-bold mb-6 text-center">
-          Tiermaker 스타일 테이블
-        </h1>
-        <div
-          className="rounded-xl p-1"
-          style={{
-            background: "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
-          }}
-        >
-          <div
-            className="rounded-lg bg-transparent"
-            style={{ border: "1px solid rgba(255,255,255,0.08)" }}
-          >
-            <Table rows={rows} />
-          </div>
+      <div className="max-w-5xl w-full p-4">
+        <Header />
+        <div className="rounded-xl p-1">
+          <Table rows={rows} />
         </div>
       </div>
     </Layout>
