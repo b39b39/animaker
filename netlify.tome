@@ -1,12 +1,9 @@
 [build]
   command = "npm run build"
-  publish = "out"
+  publish = "dist"
 
-[dev]
-  command = "npm run dev"
-  port = 8888
-  functions = "netlify/functions"
+[functions]
+  directory = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
-  NODE_ENV = "development"
