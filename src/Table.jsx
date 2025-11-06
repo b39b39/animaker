@@ -118,17 +118,17 @@ export function Table() {
                             </div>
 
                             <h3 className="text-sm font-semibold text-white mb-1">느낀 점</h3>
-                            <p className="text-gray-300 mb-6 leading-relaxed">{selectedItem.description}</p>
+                            <p className="text-gray-300 mb-6 leading-relaxed whitespace-pre-line">{selectedItem.description}</p>
 
                             <hr className="border-gray-700 mb-4" />
                             <h3 className="text-sm font-semibold text-green-400 mb-1">좋은 점</h3>
-                            <p className="text-gray-300 mb-6 leading-relaxed">
+                            <p className="text-gray-300 mb-6 leading-relaxed whitespace-pre-line">
                                 {selectedItem.strength}
                             </p>
 
                             <hr className="border-gray-700 mb-4" />
                             <h3 className="text-sm font-semibold text-red-400 mb-1">아쉬운 점</h3>
-                            <p className="text-gray-300 leading-relaxed">{selectedItem.weakness}</p>
+                            <p className="text-gray-300 leading-relaxed whitespace-pre-line">{selectedItem.weakness}</p>
                         </div>
                     </div>
                 </div>

@@ -19,16 +19,16 @@ export async function handler(event) {
         const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
         const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
 
-        // ✅ Netlify Node18+ 에는 FormData와 fetch가 기본 탑재되어 있음
-        const formData = new FormData();
-        formData.append("file", fileData);
-        formData.append("upload_preset", uploadPreset);
-        if (folder) formData.append("folder", folder);
-        if (public_id) formData.append("public_id", public_id);
-
+        // ✅ Cloudinary JSON API로 업로드 (FormData 대신)
         const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
             method: "POST",
-            body: formData,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                file: fileData, // base64 문자열
+                upload_preset: uploadPreset,
+                folder,
+                public_id,
+            }),
         });
 
         const result = await res.json();

@@ -368,7 +368,12 @@ export default function DevApp() {
                                     <ImageCropModal
                                         image={cropImage}
                                         onClose={() => setCropImage(null)}
-                                        onCropComplete={async (croppedFile) => {
+                                        onCropComplete={async (croppedBlob) => {
+                                            // ✅ Blob → File 변환
+                                            const croppedFile = new File([croppedBlob], `${selectedItem.id}_thumb.png`, {
+                                                type: "image/png",
+                                            });
+
                                             const url = await handleFileUpload(croppedFile, "thumbnail", selectedItem.id);
                                             if (url) setSelectedItem((prev) => ({ ...prev, thumbnail: url }));
                                         }}
