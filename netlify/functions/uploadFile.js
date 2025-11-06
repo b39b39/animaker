@@ -1,7 +1,6 @@
-import fs from "fs";
-import path from "path";
+import fetch from "node-fetch";
 
-export async function handler(event, context) {
+export async function handler(event) {
     if (event.httpMethod !== "POST") {
         return {
             statusCode: 405,
@@ -10,40 +9,43 @@ export async function handler(event, context) {
     }
 
     try {
-        const { fileData, fileName, relativePath } = JSON.parse(event.body);
+        const { fileData } = JSON.parse(event.body);
 
-        if (!fileData || !fileName || !relativePath) {
+        if (!fileData) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: "Invalid request data" }),
+                body: JSON.stringify({ error: "Missing file data" }),
             };
         }
 
-        // public 폴더 경로 설정
-        const saveDir = path.join(process.cwd(), "public", relativePath);
-        const savePath = path.join(saveDir, fileName);
+        const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+        const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
 
-        // 폴더 없으면 생성
-        fs.mkdirSync(saveDir, { recursive: true });
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                file: fileData, // base64 or URL 가능
+                upload_preset: uploadPreset,
+            }),
+        });
 
-        // base64 → 버퍼 변환
-        const base64Data = fileData.replace(/^data:.+;base64,/, "");
-        const fileBuffer = Buffer.from(base64Data, "base64");
+        const result = await res.json();
 
-        // 파일 저장
-        fs.writeFileSync(savePath, fileBuffer);
-
-        console.log(`✅ 파일 저장 완료: ${savePath}`);
+        if (result.error) {
+            throw new Error(result.error.message);
+        }
 
         return {
             statusCode: 200,
             body: JSON.stringify({
                 success: true,
-                path: `/${relativePath}/${fileName}`,
+                url: result.secure_url,
+                public_id: result.public_id,
             }),
         };
     } catch (err) {
-        console.error("❌ 파일 업로드 오류:", err);
+        console.error("❌ 업로드 실패:", err);
         return {
             statusCode: 500,
             body: JSON.stringify({ error: err.message }),

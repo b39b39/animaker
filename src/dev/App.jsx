@@ -193,26 +193,31 @@ export default function DevApp() {
         await handleSave(tiers, updatedItems);
     }
 
-    // ✅ 이미지/썸네일 업로드 처리 함수
+    // ✅ Cloudinary 업로드 처리 함수
     async function handleFileUpload(file, type, itemId) {
         const reader = new FileReader();
 
         return new Promise((resolve, reject) => {
             reader.onload = async (event) => {
-                const base64Data = event.target.result;
-                const fileName = `${itemId}.png`;
+                const base64Data = event.target.result; // base64 인코딩된 파일 데이터
                 const relativePath = type === "image" ? "images" : "thumbnails";
 
                 try {
+                    // ✅ Netlify Function 호출 (Cloudinary 업로드 담당)
                     const res = await fetch("/.netlify/functions/uploadFile", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ fileData: base64Data, fileName, relativePath }),
+                        body: JSON.stringify({
+                            fileData: base64Data,
+                            folder: relativePath, // Cloudinary 폴더로 전달
+                            public_id: `${itemId}`, // 선택사항: 고유 ID로 저장
+                        }),
                     });
 
                     if (!res.ok) throw new Error("업로드 실패");
+
                     const data = await res.json();
-                    resolve(data.path);
+                    resolve(data.path); // ✅ Cloudinary URL 반환
                 } catch (err) {
                     console.error("업로드 실패:", err);
                     reject(err);
