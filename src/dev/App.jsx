@@ -308,137 +308,144 @@ export default function DevApp() {
                     onClick={handleModalClose}
                 >
                     <div
-                        className="bg-[#1a1a1a] rounded-lg max-w-5xl w-full p-6 relative flex flex-col md:flex-row gap-6"
+                        className="bg-[#1a1a1a] rounded-lg max-w-5xl w-full p-6 relative flex flex-col gap-6"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex-shrink-0 w-full md:w-1/2 flex flex-col justify-center items-center gap-3">
-                            <img
-                                src={selectedItem.image || selectedItem.thumbnail}
-                                alt={selectedItem.title}
-                                className="rounded-lg max-h-[400px] object-contain"
-                            />
-                            <label className="text-gray-400 text-sm">
-                                이미지 업로드:
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="ml-2"
-                                    onChange={async (e) => {
-                                        const file = e.target.files[0];
-                                        if (!file) return;
-                                        const url = await handleFileUpload(file, "image", selectedItem.id);
-                                        if (url) setSelectedItem((prev) => ({ ...prev, image: url }));
-                                    }}
+                        {/* ✅ 상단: 이미지/정보 반반 영역 */}
+                        <div className="flex flex-col md:flex-row gap-6">
+                            {/* 왼쪽 - 이미지, 업로드 */}
+                            <div className="flex-shrink-0 w-full md:w-1/2 flex flex-col justify-center items-center gap-3">
+                                <img
+                                    src={selectedItem.image || selectedItem.thumbnail}
+                                    alt={selectedItem.title}
+                                    className="rounded-lg max-h-[400px] object-contain"
                                 />
-                            </label>
 
-                            <label className="text-gray-400 text-sm">
-                                썸네일 업로드:
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="ml-2"
-                                    onChange={(e) => {
-                                        const file = e.target.files[0];
-                                        if (!file) return;
-                                        const reader = new FileReader();
-                                        reader.onload = () => setCropImage(reader.result); // Crop 모달 띄움
-                                        reader.readAsDataURL(file);
-                                    }}
-                                />
-                            </label>
+                                <label className="text-gray-400 text-sm">
+                                    이미지 업로드:
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="ml-2"
+                                        onChange={async (e) => {
+                                            const file = e.target.files[0];
+                                            if (!file) return;
+                                            const url = await handleFileUpload(file, "image", selectedItem.id);
+                                            if (url) setSelectedItem((prev) => ({ ...prev, image: url }));
+                                        }}
+                                    />
+                                </label>
 
-                            {cropImage && (
-                                <ImageCropModal
-                                    image={cropImage}
-                                    onClose={() => setCropImage(null)}
-                                    onCropComplete={async (croppedFile) => {
-                                        const url = await handleFileUpload(croppedFile, "thumbnail", selectedItem.id);
-                                        if (url) setSelectedItem((prev) => ({ ...prev, thumbnail: url }));
-                                    }}
-                                />
-                            )}
-                        </div>
+                                <label className="text-gray-400 text-sm">
+                                    썸네일 업로드:
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="ml-2"
+                                        onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (!file) return;
+                                            const reader = new FileReader();
+                                            reader.onload = () => setCropImage(reader.result);
+                                            reader.readAsDataURL(file);
+                                        }}
+                                    />
+                                </label>
 
-                        <div className="flex flex-col w-full md:w-1/2 text-gray-100">
-                            <input
-                                type="text"
-                                className="bg-gray-800 p-2 rounded mb-3 w-full"
-                                value={selectedItem.title || ""}
-                                onChange={(e) =>
-                                    setSelectedItem({ ...selectedItem, title: e.target.value })
-                                }
-                            />
-
-                            {/* ✅ tiers 수정 섹션 */}
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                {(selectedItem.tiers || []).map((tier, idx) => (
-                                    <div key={idx} className="flex items-center bg-gray-700 rounded px-2 py-1">
-                                        <input
-                                            type="text"
-                                            value={tier}
-                                            onChange={(e) => {
-                                                const newTiers = [...selectedItem.tiers];
-                                                newTiers[idx] = e.target.value;
-                                                setSelectedItem({ ...selectedItem, tiers: newTiers });
-                                            }}
-                                            className="bg-transparent text-gray-100 focus:outline-none px-1"
-                                        />
-                                        <button
-                                            onClick={() => {
-                                                const newTiers = selectedItem.tiers.filter((_, i) => i !== idx);
-                                                setSelectedItem({ ...selectedItem, tiers: newTiers });
-                                            }}
-                                            className="ml-1 text-red-400 hover:text-red-500 font-bold"
-                                        >
-                                            ✕
-                                        </button>
-                                    </div>
-                                ))}
-
-                                {/* ➕ 새 tier 추가 버튼 */}
-                                <button
-                                    onClick={() => {
-                                        const newTiers = [...(selectedItem.tiers || []), ""];
-                                        setSelectedItem({ ...selectedItem, tiers: newTiers });
-                                    }}
-                                    className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-500"
-                                >
-                                    ＋
-                                </button>
+                                {cropImage && (
+                                    <ImageCropModal
+                                        image={cropImage}
+                                        onClose={() => setCropImage(null)}
+                                        onCropComplete={async (croppedFile) => {
+                                            const url = await handleFileUpload(croppedFile, "thumbnail", selectedItem.id);
+                                            if (url) setSelectedItem((prev) => ({ ...prev, thumbnail: url }));
+                                        }}
+                                    />
+                                )}
                             </div>
 
-                            <h3 className="text-lg font-semibold text-white mb-1">느낀 점</h3>
-                            <textarea
-                                className="bg-gray-800 p-2 rounded mb-3 w-full h-24"
-                                value={selectedItem.description || ""}
-                                onChange={(e) =>
-                                    setSelectedItem({ ...selectedItem, description: e.target.value })
-                                }
-                            />
+                            {/* 오른쪽 - 텍스트 정보 */}
+                            <div className="flex flex-col w-full md:w-1/2 text-gray-100">
+                                <input
+                                    type="text"
+                                    className="bg-gray-800 p-2 rounded mb-3 w-full"
+                                    value={selectedItem.title || ""}
+                                    onChange={(e) =>
+                                        setSelectedItem({ ...selectedItem, title: e.target.value })
+                                    }
+                                />
 
-                            <h3 className="text-sm font-semibold text-green-400 mb-1">좋은 점</h3>
-                            <textarea
-                                className="bg-gray-800 p-2 rounded mb-3 w-full h-20"
-                                value={selectedItem.strength || ""}
-                                onChange={(e) =>
-                                    setSelectedItem({ ...selectedItem, strength: e.target.value })
-                                }
-                            />
+                                {/* ✅ types 수정 섹션 */}
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {(selectedItem.types || []).map((type, idx) => (
+                                        <div key={idx} className="flex items-center bg-gray-700 rounded px-2 py-1">
+                                            <input
+                                                type="text"
+                                                value={type}
+                                                onChange={(e) => {
+                                                    const newTypes = [...(selectedItem.types || [])];
+                                                    newTypes[idx] = e.target.value;
+                                                    setSelectedItem({ ...selectedItem, types: newTypes });
+                                                }}
+                                                className="bg-transparent text-gray-100 focus:outline-none px-1"
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    const newTypes = (selectedItem.types || []).filter((_, i) => i !== idx);
+                                                    setSelectedItem({ ...selectedItem, types: newTypes });
+                                                }}
+                                                className="ml-1 text-red-400 hover:text-red-500 font-bold"
+                                                type="button"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
 
-                            <h3 className="text-sm font-semibold text-red-400 mb-1">아쉬운 점</h3>
-                            <textarea
-                                className="bg-gray-800 p-2 rounded w-full h-20"
-                                value={selectedItem.weakness || ""}
-                                onChange={(e) =>
-                                    setSelectedItem({ ...selectedItem, weakness: e.target.value })
-                                }
-                            />
+                                    {/* ➕ 새 type 추가 버튼 */}
+                                    <button
+                                        onClick={() => {
+                                            const newTypes = [...(selectedItem.types || []), ""];
+                                            setSelectedItem({ ...selectedItem, types: newTypes });
+                                        }}
+                                        className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-500"
+                                        type="button"
+                                    >
+                                        ＋
+                                    </button>
+                                </div>
+
+                                <h3 className="text-sm font-semibold text-white mb-1">느낀 점</h3>
+                                <textarea
+                                    className="bg-gray-800 p-2 rounded mb-3 w-full h-24"
+                                    value={selectedItem.description || ""}
+                                    onChange={(e) =>
+                                        setSelectedItem({ ...selectedItem, description: e.target.value })
+                                    }
+                                />
+
+                                <h3 className="text-sm font-semibold text-green-400 mb-1">좋은 점</h3>
+                                <textarea
+                                    className="bg-gray-800 p-2 rounded mb-3 w-full h-20"
+                                    value={selectedItem.strength || ""}
+                                    onChange={(e) =>
+                                        setSelectedItem({ ...selectedItem, strength: e.target.value })
+                                    }
+                                />
+
+                                <h3 className="text-sm font-semibold text-red-400 mb-1">아쉬운 점</h3>
+                                <textarea
+                                    className="bg-gray-800 p-2 rounded w-full h-20"
+                                    value={selectedItem.weakness || ""}
+                                    onChange={(e) =>
+                                        setSelectedItem({ ...selectedItem, weakness: e.target.value })
+                                    }
+                                />
+                            </div>
                         </div>
 
-                        {/* ✅ 하단 버튼 영역 */}
+                        {/* ✅ 하단 버튼 영역 (별도) */}
                         <div className="flex justify-end gap-3 mt-4">
-                            {/* 삭제 버튼 */}
                             <button
                                 onClick={async () => {
                                     if (!window.confirm("정말 삭제하시겠습니까?")) return;
@@ -473,7 +480,6 @@ export default function DevApp() {
                                 삭제
                             </button>
 
-                            {/* 취소 버튼 */}
                             <button
                                 onClick={handleModalClose}
                                 className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-500"
@@ -481,10 +487,8 @@ export default function DevApp() {
                                 취소
                             </button>
 
-                            {/* 확인 버튼 */}
                             <button
                                 onClick={async () => {
-                                    // ✅ X버튼 눌렀을 때 동일한 동작
                                     await handleSave(tiers, items);
                                     setSelectedItem(null);
                                 }}
@@ -496,6 +500,7 @@ export default function DevApp() {
                     </div>
                 </div>
             )}
+
         </div>
     );
 }
