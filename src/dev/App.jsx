@@ -229,11 +229,11 @@ export default function DevApp() {
         });
     }
 
-    function handleModalCloseWithoutSave() {
+    function handleModalClose() {
         setSelectedItem(null);
     }
 
-    async function handleModalClose() {
+    async function handleModalCloseAndSave() {
         if (!selectedItem || isSaving) return; // 이미 저장 중이면 중복 클릭 방지
         setIsSaving(true);
         if (selectedItem) {
@@ -470,16 +470,45 @@ export default function DevApp() {
                                     const containerId = findContainer(selectedItem.id);
                                     const pathsToDelete = [selectedItem.image, selectedItem.thumbnail].filter(Boolean);
 
-                                    for (const filePath of pathsToDelete) {
+                                    // ✅ URL → public_id 변환 함수
+                                    const extractPublicId = (url) => {
+                                        if (!url) return null;
                                         try {
-                                            await fetch("/.netlify/functions/deleteFile", {
+                                            // 예: https://res.cloudinary.com/do50pmbug/image/upload/v1762462960/images/2.jpg
+                                            const parts = url.split("/upload/");
+                                            if (parts.length < 2) return null;
+                                            const pathWithVersion = parts[1]; // v1762462960/images/2.jpg
+                                            const path = pathWithVersion.replace(/^v\d+\//, ""); // images/2.jpg
+                                            return path.replace(/\.[^/.]+$/, ""); // images/2
+                                        } catch (e) {
+                                            console.error("❌ public_id 추출 실패:", e);
+                                            return null;
+                                        }
+                                    };
+
+                                    for (const filePath of pathsToDelete) {
+                                        const public_id = extractPublicId(filePath);
+                                        if (!public_id) {
+                                            console.warn("⚠️ public_id 추출 실패:", filePath);
+                                            continue;
+                                        }
+
+                                        try {
+                                            const res = await fetch("/.netlify/functions/deleteFile", {
                                                 method: "POST",
                                                 headers: { "Content-Type": "application/json" },
-                                                body: JSON.stringify({ filePath }),
+                                                body: JSON.stringify({ public_id }), // ✅ URL 대신 public_id만 보냄
                                             });
-                                            console.log(`🗑️ Deleted: ${filePath}`);
+
+                                            const result = await res.json();
+
+                                            if (result.success) {
+                                                console.log(`🗑️ Deleted: ${public_id}`);
+                                            } else {
+                                                console.error("❌ 삭제 실패:", result.error || result);
+                                            }
                                         } catch (err) {
-                                            console.error("파일 삭제 실패:", err);
+                                            console.error("❌ 삭제 요청 실패:", err);
                                         }
                                     }
 
@@ -497,15 +526,16 @@ export default function DevApp() {
                                 삭제
                             </button>
 
+
                             <button
-                                onClick={handleModalCloseWithoutSave}
+                                onClick={handleModalClose}
                                 className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-500"
                             >
                                 취소
                             </button>
 
                             <button
-                                onClick={handleModalClose}
+                                onClick={handleModalCloseAndSave}
                                 disabled={isSaving}
                                 className={`px-4 py-2 rounded text-white transition ${isSaving ? "bg-green-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}
                             >
