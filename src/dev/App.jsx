@@ -22,6 +22,7 @@ export default function DevApp() {
     const [activeItem, setActiveItem] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null);
     const [cropImage, setCropImage] = useState(null); // crop 모달용 상태
+    const [isSaving, setIsSaving] = useState(false);
 
 
     const sensors = useSensors(
@@ -223,8 +224,13 @@ export default function DevApp() {
         });
     }
 
+    function handleModalCloseWithoutSave() {
+        setSelectedItem(null);
+    }
 
     async function handleModalClose() {
+        if (!selectedItem || isSaving) return; // 이미 저장 중이면 중복 클릭 방지
+        setIsSaving(true);
         if (selectedItem) {
             const containerId = findContainer(selectedItem.id);
             const updated = { ...items };
@@ -235,6 +241,7 @@ export default function DevApp() {
             await handleSave(tiers, updated);
         }
         setSelectedItem(null);
+        setIsSaving(false);
     }
 
     // ✅ 인증 전 화면 (비밀번호 입력)
@@ -481,20 +488,18 @@ export default function DevApp() {
                             </button>
 
                             <button
-                                onClick={handleModalClose}
+                                onClick={handleModalCloseWithoutSave}
                                 className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-500"
                             >
                                 취소
                             </button>
 
                             <button
-                                onClick={async () => {
-                                    await handleSave(tiers, items);
-                                    setSelectedItem(null);
-                                }}
-                                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                                onClick={handleModalClose}
+                                disabled={isSaving}
+                                className={`px-4 py-2 rounded text-white transition ${isSaving ? "bg-green-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}
                             >
-                                확인
+                                {isSaving ? "저장 중..." : "확인"}
                             </button>
                         </div>
                     </div>
