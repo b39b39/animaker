@@ -311,52 +311,6 @@ export default function DevApp() {
                         className="bg-[#1a1a1a] rounded-lg max-w-5xl w-full p-6 relative flex flex-col md:flex-row gap-6"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button
-                            className="absolute top-4 right-4 text-white font-bold text-xl hover:text-gray-400"
-                            onClick={handleModalClose}
-                        >
-                            ✕
-                        </button>
-
-                        {/* 🗑️ 삭제 버튼 */}
-                        <button
-                            onClick={async () => {
-                                if (!window.confirm("정말 삭제하시겠습니까?")) return;
-
-                                const containerId = findContainer(selectedItem.id);
-
-                                // ✅ 이미지 및 썸네일 삭제
-                                const pathsToDelete = [selectedItem.image, selectedItem.thumbnail].filter(Boolean);
-
-                                for (const filePath of pathsToDelete) {
-                                    try {
-                                        await fetch("/.netlify/functions/deleteFile", {
-                                            method: "POST",
-                                            headers: { "Content-Type": "application/json" },
-                                            body: JSON.stringify({ filePath }),
-                                        });
-                                        console.log(`🗑️ Deleted: ${filePath}`);
-                                    } catch (err) {
-                                        console.error("파일 삭제 실패:", err);
-                                    }
-                                }
-
-                                // ✅ items에서 해당 아이템 제거
-                                const updatedItems = {
-                                    ...items,
-                                    [containerId]: items[containerId].filter((i) => i.id !== selectedItem.id),
-                                };
-
-                                // ✅ 상태 업데이트 및 DB 저장
-                                setItems(updatedItems);
-                                await handleSave(tiers, updatedItems);
-                                setSelectedItem(null);
-                            }}
-                            className="absolute bottom-4 right-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                        >
-                            삭제
-                        </button>
-
                         <div className="flex-shrink-0 w-full md:w-1/2 flex flex-col justify-center items-center gap-3">
                             <img
                                 src={selectedItem.image || selectedItem.thumbnail}
@@ -416,6 +370,45 @@ export default function DevApp() {
                                 }
                             />
 
+                            {/* ✅ tiers 수정 섹션 */}
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                {(selectedItem.tiers || []).map((tier, idx) => (
+                                    <div key={idx} className="flex items-center bg-gray-700 rounded px-2 py-1">
+                                        <input
+                                            type="text"
+                                            value={tier}
+                                            onChange={(e) => {
+                                                const newTiers = [...selectedItem.tiers];
+                                                newTiers[idx] = e.target.value;
+                                                setSelectedItem({ ...selectedItem, tiers: newTiers });
+                                            }}
+                                            className="bg-transparent text-gray-100 focus:outline-none px-1"
+                                        />
+                                        <button
+                                            onClick={() => {
+                                                const newTiers = selectedItem.tiers.filter((_, i) => i !== idx);
+                                                setSelectedItem({ ...selectedItem, tiers: newTiers });
+                                            }}
+                                            className="ml-1 text-red-400 hover:text-red-500 font-bold"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                ))}
+
+                                {/* ➕ 새 tier 추가 버튼 */}
+                                <button
+                                    onClick={() => {
+                                        const newTiers = [...(selectedItem.tiers || []), ""];
+                                        setSelectedItem({ ...selectedItem, tiers: newTiers });
+                                    }}
+                                    className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-500"
+                                >
+                                    ＋
+                                </button>
+                            </div>
+
+                            <h3 className="text-lg font-semibold text-white mb-1">느낀 점</h3>
                             <textarea
                                 className="bg-gray-800 p-2 rounded mb-3 w-full h-24"
                                 value={selectedItem.description || ""}
@@ -424,7 +417,7 @@ export default function DevApp() {
                                 }
                             />
 
-                            <h3 className="text-lg font-semibold text-green-400 mb-1">좋다</h3>
+                            <h3 className="text-sm font-semibold text-green-400 mb-1">좋은 점</h3>
                             <textarea
                                 className="bg-gray-800 p-2 rounded mb-3 w-full h-20"
                                 value={selectedItem.strength || ""}
@@ -433,7 +426,7 @@ export default function DevApp() {
                                 }
                             />
 
-                            <h3 className="text-lg font-semibold text-red-400 mb-1">아쉽다</h3>
+                            <h3 className="text-sm font-semibold text-red-400 mb-1">아쉬운 점</h3>
                             <textarea
                                 className="bg-gray-800 p-2 rounded w-full h-20"
                                 value={selectedItem.weakness || ""}
@@ -441,6 +434,64 @@ export default function DevApp() {
                                     setSelectedItem({ ...selectedItem, weakness: e.target.value })
                                 }
                             />
+                        </div>
+
+                        {/* ✅ 하단 버튼 영역 */}
+                        <div className="flex justify-end gap-3 mt-4">
+                            {/* 삭제 버튼 */}
+                            <button
+                                onClick={async () => {
+                                    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+
+                                    const containerId = findContainer(selectedItem.id);
+                                    const pathsToDelete = [selectedItem.image, selectedItem.thumbnail].filter(Boolean);
+
+                                    for (const filePath of pathsToDelete) {
+                                        try {
+                                            await fetch("/.netlify/functions/deleteFile", {
+                                                method: "POST",
+                                                headers: { "Content-Type": "application/json" },
+                                                body: JSON.stringify({ filePath }),
+                                            });
+                                            console.log(`🗑️ Deleted: ${filePath}`);
+                                        } catch (err) {
+                                            console.error("파일 삭제 실패:", err);
+                                        }
+                                    }
+
+                                    const updatedItems = {
+                                        ...items,
+                                        [containerId]: items[containerId].filter((i) => i.id !== selectedItem.id),
+                                    };
+
+                                    setItems(updatedItems);
+                                    await handleSave(tiers, updatedItems);
+                                    setSelectedItem(null);
+                                }}
+                                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                            >
+                                삭제
+                            </button>
+
+                            {/* 취소 버튼 */}
+                            <button
+                                onClick={handleModalClose}
+                                className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-500"
+                            >
+                                취소
+                            </button>
+
+                            {/* 확인 버튼 */}
+                            <button
+                                onClick={async () => {
+                                    // ✅ X버튼 눌렀을 때 동일한 동작
+                                    await handleSave(tiers, items);
+                                    setSelectedItem(null);
+                                }}
+                                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                            >
+                                확인
+                            </button>
                         </div>
                     </div>
                 </div>
