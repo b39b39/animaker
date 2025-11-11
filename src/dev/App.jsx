@@ -23,6 +23,7 @@ export default function DevApp() {
     const [selectedItem, setSelectedItem] = useState(null);
     const [cropImage, setCropImage] = useState(null); // crop 모달용 상태
     const [isSaving, setIsSaving] = useState(false);
+    const [activeTab, setActiveTab] = useState("image"); // 'image' | 'thumbnail'
 
 
     const sensors = useSensors(
@@ -325,59 +326,94 @@ export default function DevApp() {
                     >
                         {/* ✅ 상단: 이미지/정보 반반 영역 */}
                         <div className="flex flex-col md:flex-row gap-6">
-                            {/* 왼쪽 - 이미지, 업로드 */}
-                            <div className="flex-shrink-0 w-full md:w-1/2 flex flex-col justify-center items-center gap-3">
-                                <img
-                                    src={selectedItem.image || selectedItem.thumbnail}
-                                    alt={selectedItem.title}
-                                    className="rounded-lg max-h-[400px] object-contain"
-                                />
+                            <div className="flex-shrink-0 w-full md:w-1/2 flex flex-col items-center gap-4">
+                                {/* ✅ 탭 헤더 */}
+                                <div className="flex gap-4 border-b border-gray-600 mb-2">
+                                    {["image", "thumbnail"].map((tab) => (
+                                        <button
+                                            key={tab}
+                                            onClick={() => setActiveTab(tab)}
+                                            className={`px-4 py-2 text-sm font-medium transition-colors ${
+                                                activeTab === tab
+                                                    ? "border-b-2 border-blue-400 text-blue-400"
+                                                    : "text-gray-400 hover:text-gray-200"
+                                            }`}
+                                        >
+                                            {tab === "image" ? "메인 이미지" : "썸네일"}
+                                        </button>
+                                    ))}
+                                </div>
 
-                                <label className="text-gray-400 text-sm">
-                                    이미지 업로드:
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        className="ml-2"
-                                        onChange={async (e) => {
-                                            const file = e.target.files[0];
-                                            if (!file) return;
-                                            const url = await handleFileUpload(file, "image", selectedItem.id);
-                                            if (url) setSelectedItem((prev) => ({ ...prev, image: url }));
-                                        }}
-                                    />
-                                </label>
+                                {/* ✅ 탭별 콘텐츠 */}
+                                {activeTab === "image" ? (
+                                    <div className="flex flex-col items-center gap-3 w-full">
+                                        <img
+                                            src={selectedItem.image || "/placeholder.png"}
+                                            alt={selectedItem.title}
+                                            className="rounded-lg max-h-[400px] object-contain"
+                                        />
 
-                                <label className="text-gray-400 text-sm">
-                                    썸네일 업로드:
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        className="ml-2"
-                                        onChange={(e) => {
-                                            const file = e.target.files[0];
-                                            if (!file) return;
-                                            const reader = new FileReader();
-                                            reader.onload = () => setCropImage(reader.result);
-                                            reader.readAsDataURL(file);
-                                        }}
-                                    />
-                                </label>
+                                        <label className="text-gray-400 text-sm">
+                                            이미지 업로드:
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="ml-2"
+                                                onChange={async (e) => {
+                                                    const file = e.target.files[0];
+                                                    if (!file) return;
+                                                    const url = await handleFileUpload(file, "image", selectedItem.id);
+                                                    if (url)
+                                                        setSelectedItem((prev) => ({
+                                                            ...prev,
+                                                            image: url,
+                                                        }));
+                                                }}
+                                            />
+                                        </label>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center gap-3 w-full">
+                                        <img
+                                            src={selectedItem.thumbnail || "/placeholder-thumb.png"}
+                                            alt={`${selectedItem.title} thumbnail`}
+                                            className="rounded-lg max-h-[400px] object-contain"
+                                        />
 
-                                {cropImage && (
-                                    <ImageCropModal
-                                        image={cropImage}
-                                        onClose={() => setCropImage(null)}
-                                        onCropComplete={async (croppedBlob) => {
-                                            // ✅ Blob → File 변환
-                                            const croppedFile = new File([croppedBlob], `${selectedItem.id}_thumb.png`, {
-                                                type: "image/png",
-                                            });
+                                        <label className="text-gray-400 text-sm">
+                                            썸네일 업로드:
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="ml-2"
+                                                onChange={(e) => {
+                                                    const file = e.target.files[0];
+                                                    if (!file) return;
+                                                    const reader = new FileReader();
+                                                    reader.onload = () => setCropImage(reader.result);
+                                                    reader.readAsDataURL(file);
+                                                }}
+                                            />
+                                        </label>
 
-                                            const url = await handleFileUpload(croppedFile, "thumbnail", selectedItem.id);
-                                            if (url) setSelectedItem((prev) => ({ ...prev, thumbnail: url }));
-                                        }}
-                                    />
+                                        {cropImage && (
+                                            <ImageCropModal
+                                                image={cropImage}
+                                                onClose={() => setCropImage(null)}
+                                                onCropComplete={async (croppedBlob) => {
+                                                    const croppedFile = new File([croppedBlob], `${selectedItem.id}_thumb.png`, {
+                                                        type: "image/png",
+                                                    });
+                                                    const url = await handleFileUpload(croppedFile, "thumbnail", selectedItem.id);
+                                                    if (url)
+                                                        setSelectedItem((prev) => ({
+                                                            ...prev,
+                                                            thumbnail: url,
+                                                        }));
+                                                }}
+                                            />
+                                        )}
+                                    </div>
                                 )}
                             </div>
 
