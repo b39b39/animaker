@@ -3,7 +3,6 @@ import "./Table.css";
 
 export function Table() {
     const [tiers, setTiers] = useState([]);
-    const [items, setItems] = useState({});
     const [selectedItem, setSelectedItem] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -14,8 +13,8 @@ export function Table() {
             if (!res.ok) throw new Error("데이터 요청 실패");
             const data = await res.json();
 
-            setTiers(data.tiers || []);
-            setItems(data.items || {});
+            // 🔹 SQL 데이터 구조: tiers 배열 안에 items 포함
+            setTiers(data.data || []);
         } catch (err) {
             console.error("❌ getData error:", err);
         } finally {
@@ -32,7 +31,7 @@ export function Table() {
     return (
         <>
             <div className="w-full border border-gray-600 overflow-hidden">
-                {tiers.map((tier) => (
+                {tiers.slice(0, -1).map((tier) => (
                     <div
                         key={tier.id}
                         className="flex border-b border-gray-600 last:border-b-0"
@@ -43,20 +42,20 @@ export function Table() {
                             className="w-24 flex items-center justify-center text-lg font-bold"
                             style={{ color: "#fff", backgroundColor: tier.color }}
                         >
-                            {tier.id}
+                            {tier.name}
                         </div>
 
                         {/* 오른쪽 아이템 영역 */}
                         <div className="flex-1 flex flex-wrap bg-[#0f0f0f] items-center">
-                            {items[tier.id] && items[tier.id].length > 0 ? (
-                                items[tier.id].map((item) => (
+                            {tier.items && tier.items.length > 0 ? (
+                                tier.items.map((item) => (
                                     <div
                                         key={item.id}
                                         className="relative w-[100px] h-[100px] bg-gray-700 overflow-hidden flex items-center justify-center border border-gray-500 cursor-pointer group"
                                         onClick={() => setSelectedItem(item)}
                                     >
                                         <img
-                                            src={item.thumbnail}
+                                            src={item.thumbnail_url} // 🔹 수정: thumbnail_url
                                             alt={item.title}
                                             className="w-full h-full object-cover transition duration-300 group-hover:brightness-50"
                                         />
@@ -96,7 +95,7 @@ export function Table() {
                         {/* 이미지 영역 */}
                         <div className="flex-shrink-0 w-full md:w-1/2 flex justify-center items-center">
                             <img
-                                src={selectedItem.image}
+                                src={selectedItem.image_url} // 🔹 수정: image_url
                                 alt={selectedItem.title}
                                 className="rounded-lg max-h-[500px] object-contain"
                             />

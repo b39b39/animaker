@@ -20,7 +20,7 @@ export async function handler(event) {
         }
 
         // ⚙️ Cloudinary 인증 정보 (환경 변수로 관리 권장)
-        const cloudName process.env.CLOUDINARY_CLOUD_NAME
+        const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
         const apiKey = process.env.CLOUDINARY_API_KEY;
         const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
